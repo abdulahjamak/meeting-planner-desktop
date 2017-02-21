@@ -24,6 +24,8 @@ public class Main extends Application {
     public static Path exportDir = Paths.get(System.getProperty("user.dir") + "/export/");
     public static Path file;
 
+    public static final String version = "1.1";
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -73,7 +75,7 @@ public class Main extends Application {
         });
 
         stage.setScene(scene);
-        stage.setTitle("Meeting Planner");
+        stage.setTitle("Meeting Planner " + version);
         stage.show();
         stage.setMaximized(true);
         /*
@@ -183,9 +185,27 @@ public class Main extends Application {
         mAbout.setOnAction(event -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.initStyle(StageStyle.UTILITY);
-            alert.setHeaderText("");
-            alert.setContentText("Ali Dlakic\nali@pro.ba\nCopyright 2016");
+            alert.setTitle("About");
+            alert.setHeaderText("License and Terms");
+            alert.setContentText("Meeting Planner\n" +
+                    "Copyright (C) 2016  Ali Dlakic (ali@pro.ba)\n" +
+                    "https://github.com/4000a/meeting-planner-desktop\n\n" +
+                    "This program is free software: you can redistribute it and/or modify " +
+                    "it under the terms of the GNU Affero General Public License as " +
+                    "published by the Free Software Foundation, either version 3 of the " +
+                    "License, or (at your option) any later version. " +
+                    "\n\n" +
+                    "This program is distributed in the hope that it will be useful, " +
+                    "but WITHOUT ANY WARRANTY; without even the implied warranty of " +
+                    "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the " +
+                    "GNU Affero General Public License for more details. " +
+                    "\n\n" +
+                    "You should have received a copy of the GNU Affero General Public License " +
+                    "along with this program.  If not, see <http://www.gnu.org/licenses/>.");
             alert.show();
+
+            alert.setWidth(500);
+            alert.setHeight(500);
         });
         mFile.getItems().addAll(mNew, mOpen, mSave, mSaveAs, mReport, mExit);
         mHelp.getItems().addAll(mAbout);

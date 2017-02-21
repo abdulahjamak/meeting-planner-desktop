@@ -2,7 +2,6 @@ package meetings;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -12,7 +11,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.util.Callback;
 import org.json.JSONObject;
 
 import java.nio.file.Path;
@@ -23,8 +21,8 @@ import java.util.Set;
 import java.util.StringJoiner;
 
 public class Event {
-    public final SimpleStringProperty name = new SimpleStringProperty();
-    public final SimpleStringProperty importName = new SimpleStringProperty();
+    public final SimpleStringProperty name = new SimpleStringProperty("");
+    public final SimpleStringProperty importName = new SimpleStringProperty("");
     private final SimpleStringProperty location = new SimpleStringProperty("");
     private final SimpleStringProperty activityName = new SimpleStringProperty("Event");
     public final TimeSlot timeSlot;
@@ -58,11 +56,13 @@ public class Event {
         obj.put("start", timeSlot.start.toString());
         obj.put("end", timeSlot.end.toString());
         StringJoiner producers = new StringJoiner(",");
+        //noinspection SuspiciousMethodCalls
         participants.stream()
                 .filter(p -> p instanceof Producer)
                 .forEach(p -> producers.add(Integer.toString(DB.producers.indexOf(p))));
         obj.put("producers", producers.toString());
         StringJoiner projects = new StringJoiner(",");
+        //noinspection SuspiciousMethodCalls
         participants.stream()
                 .filter(p -> p instanceof Project)
                 .forEach(p -> projects.add(Integer.toString(DB.projects.indexOf(p))));
@@ -92,7 +92,7 @@ public class Event {
 
         VBox container = new VBox(10, new HBox(5, new Label("Event name: "), nameField),
                 new HBox(5, new Label("Location: "), locField),
-                new HBox(5, new Label("Impoort ID: "), importField),
+                new HBox(5, new Label("Import ID: "), importField),
                 new HBox(5, new Label("Activity display: "), activityField), panels, report);
         container.setPadding(new Insets(20));
         return container;
@@ -105,9 +105,9 @@ public class Event {
 
         ObservableMap<Participant, SimpleBooleanProperty> localCheckState = FXCollections.observableHashMap();
         checkProducers.setCellFactory(CheckBoxListCell.forListView(p -> {
-            if (localCheckState.containsKey(p)) {
+            if (localCheckState.containsKey(p))
                 return localCheckState.get(p);
-            }
+
             SimpleBooleanProperty observable = new SimpleBooleanProperty(participants.contains(p));
             observable.addListener((obs, oldValue, newValue) -> {
                 if (newValue) {
@@ -133,15 +133,19 @@ public class Event {
         checkAll.setOnAction(e -> list.stream()
                 .filter(p -> new Verify().verify(p, timeSlot, false).result)
                 .forEach(p -> {
-                    if (localCheckState.containsKey(p)) {
+                    String reason = new Verify().verify(p, timeSlot, false).reasons;
+                    if (!reason.isEmpty()) return;
+                    if (localCheckState.containsKey(p))
                         localCheckState.get(p).set(true);
-                        participants.add(p);
-                    }
+                    participants.add(p);
                 }));
         Button unCheckAll = new Button("Uncheck all");
         unCheckAll.setOnAction(e -> list.forEach(p -> {
-            //localCheckState.get(p).set(false);
-            participants.remove(p);
+            if (localCheckState.containsKey(p)) {
+                localCheckState.get(p).set(false);
+            } else {
+                participants.remove(p);
+            }
         }));
 
         HBox toolbar = new HBox(10, checkAll, unCheckAll);

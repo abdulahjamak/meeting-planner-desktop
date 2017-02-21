@@ -29,7 +29,7 @@ public class Export {
     public static final SimpleStringProperty footer = new SimpleStringProperty("footer\ntext\nbroj tel.");
     public static final SimpleStringProperty emailSubject = new SimpleStringProperty("Meeting schedule for #name");
     public static final SimpleStringProperty emailTemplate = new SimpleStringProperty("dear #name,\nschedule in attachment");
-    public static final SimpleBooleanProperty simpleExport = new SimpleBooleanProperty(true);
+    public static final SimpleBooleanProperty simpleExport = new SimpleBooleanProperty(false);
     public static final SimpleBooleanProperty calExport = new SimpleBooleanProperty(false);
     public static final SimpleBooleanProperty showFinished = new SimpleBooleanProperty(true);
 
@@ -154,12 +154,11 @@ public class Export {
 
         Button emailb = new Button("Email(!)");
         emailb.setStyle("-fx-base: #f3622d;");
-        emailb.setOnAction(e -> {
-            Email.email(DB.producers.stream()
-                    .filter(p -> {
-                        return p.getExportChecked() && !p.getEmail().isEmpty();
-                    }).toArray(Producer[]::new));
-        });
+        emailb.setOnAction(e -> Email.email(
+                        DB.producers.stream()
+                        .filter(p -> p.getExportChecked() && !p.getEmail().isEmpty())
+                        .toArray(Producer[]::new)
+        ));
 
         Button checkAll = new Button("Check all");
         checkAll.setOnAction(e -> DB.producers.forEach(p -> p.exportCheckedProperty().set(true)));
@@ -174,7 +173,7 @@ public class Export {
         events.setOnAction(e -> DB.producers.forEach(p -> p.exportCheckedProperty().set(DB.events.stream().anyMatch(ev -> ev.has(p)))));
         HBox buttons = new HBox(10);
 
-        buttons.getChildren().addAll(checkAll, unCheckAll, export, emailb, meetings, events);
+        buttons.getChildren().addAll(checkAll, unCheckAll, export, emailb /*, meetings, events */);
 
         Label label = new Label("Participants");
         label.setFont(Font.font(18));
@@ -228,13 +227,9 @@ public class Export {
                 .filter(p -> p.getExportChecked() && !p.getEmail().isEmpty()).toArray(Project[]::new)));
 
         Button checkAll = new Button("Check all");
-        checkAll.setOnAction(e -> {
-            DB.projects.forEach(p -> p.exportCheckedProperty().set(true));
-        });
+        checkAll.setOnAction(e -> DB.projects.forEach(p -> p.exportCheckedProperty().set(true)));
         Button unCheckAll = new Button("Uncheck all");
-        unCheckAll.setOnAction(e -> {
-            DB.projects.forEach(p -> p.exportCheckedProperty().set(false));
-        });
+        unCheckAll.setOnAction(e -> DB.projects.forEach(p -> p.exportCheckedProperty().set(false)));
 
         HBox buttons = new HBox(10);
         buttons.getChildren().addAll(checkAll, unCheckAll, export, emailb);

@@ -28,11 +28,20 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
-import java.util.stream.Stream;
 
 public class Email {
     private Session session;
     private Transport transport;
+
+    static Properties props = new Properties();
+
+    static {
+        try {
+            props.load(Email.class.getResourceAsStream("/email.txt"));
+        } catch (IOException e) {
+            System.out.println("Please add the email properties file in the resource folder!");
+        }
+    }
 
     private Email() {
     }
@@ -103,9 +112,7 @@ public class Email {
             stage.setOnCloseRequest(event -> stage.close());
             if (!task.getValue()) stage.close();
         });
-        task.messageProperty().addListener((observable, oldValue, newValue) -> {
-            list.add(newValue);
-        });
+        task.messageProperty().addListener((observable, oldValue, newValue) -> list.add(newValue));
         bar.progressProperty().bind(task.progressProperty());
         task.setOnFailed(e -> stage.close());
         stage.show();
@@ -115,12 +122,7 @@ public class Email {
     }
 
     private void connect() {
-        Properties props = new Properties();
-        try {
-            props.load(getClass().getResourceAsStream("/email.txt"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
         //props.list(System.out);
         session = Session.getDefaultInstance(props);
 
@@ -136,7 +138,7 @@ public class Email {
     private String send(String to, String name, Path file) {
         try {
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress("m.markovic@connecting-cottbus.de"));
+            message.setFrom(new InternetAddress(props.getProperty("address")));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
             message.setSubject(Export.emailSubject.get().replaceAll("#name", name));
 

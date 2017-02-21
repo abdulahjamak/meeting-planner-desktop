@@ -18,7 +18,6 @@ import org.json.JSONObject;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
 import java.util.Optional;
 
 public class Participants {
@@ -85,7 +84,7 @@ public class Participants {
 
         Button importButton = new Button("Import...");
         importButton.setOnAction(e -> {
-            TextInputDialog dialog = new TextInputDialog("paste here");
+            TextInputDialog dialog = new TextInputDialog();
             dialog.initStyle(StageStyle.UTILITY);
             dialog.setHeaderText("");
             dialog.setTitle("Import");
@@ -96,29 +95,17 @@ public class Participants {
                 try {
                     JSONObject obj = array.getJSONObject(i);
                     boolean found = false;
-                    if (obj.has("id"))
+                    if (obj.has("id") && obj.getInt("id") != -1)
                     for (Producer existing : DB.producers) {
-                        if (Objects.equals(existing.id.get(), obj.get("id")) ) {
-                            if (obj.has("events"))
-                            for (Event event: DB.events) {
-                                if ((!event.importName.get().isEmpty()) && obj.optString("events").contains(event.importName.get())) event.participants.add(existing);
-                            }
-                            if (obj.has("projects")) {
-                                for (Project project : DB.projects) {
-                                    if (obj.getString("projects").contains(project.getImportID())) {
-                                        DB.requests.add(new Request(existing, project, DB.activities.get(0))); //hack
-                                        project.count();
-                                    }
-                                }
-                                existing.count();
-                            }
+                        if (existing.id.get().equals(obj.getString("id"))) { //TODO fix types
                             if (obj.has("arrivalimport")) {
-                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M/d H:mm");
+                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yyyy H:mm");
                                 if (!obj.getString("arrivalimport").isEmpty()) {
-                                    existing.arrival.set(LocalDateTime.parse("2016-" + obj.getString("arrivalimport"), formatter));
-                                    existing.departure.set(LocalDateTime.parse("2016-" + obj.getString("departureimport"), formatter));
+                                    existing.arrival.set(LocalDateTime.parse(obj.getString("arrivalimport") + " 6:00", formatter));
+                                    existing.departure.set(LocalDateTime.parse(obj.getString("departureimport") + " 23:00", formatter));
                                 }
                             }
+                            if (obj.has("email")) existing.email.set(obj.getString("email"));
                             if (obj.has("company")) existing.setCompany(obj.getString("company"));
                             found = true;
                             break;
@@ -130,7 +117,7 @@ public class Participants {
                         DB.producers.add(new Producer(obj));
                     }
                 } catch (JSONException ex) {
-                    System.out.println(ex.getMessage());;
+                    System.out.println(ex.getMessage());
                 }
             }
         });
@@ -181,7 +168,7 @@ public class Participants {
 
         Button importButton = new Button("Import...");
         importButton.setOnAction(e -> {
-            TextInputDialog dialog = new TextInputDialog("paste here");
+            TextInputDialog dialog = new TextInputDialog();
             dialog.initStyle(StageStyle.UTILITY);
             dialog.setHeaderText("");
             dialog.setTitle("Import");

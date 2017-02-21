@@ -10,10 +10,10 @@ import javafx.scene.control.Alert;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -90,7 +90,7 @@ public class PDFGenerator {
                     .filter(ts -> ts.activity == activity)
                     .distinct()
                     .collect(Collectors.toList());
-            timeSlots.sort((o1, o2) -> o1.start.compareTo(o2.start));
+            timeSlots.sort(Comparator.comparing(o -> o.start));
             for (TimeSlot ts : timeSlots) {
                 Paragraph header = new Paragraph(ts.toString() + " - Meeting Sheet", new Font(Font.FontFamily.HELVETICA, 14));
                 header.setSpacingBefore(20);
@@ -210,7 +210,7 @@ public class PDFGenerator {
                 table.addCell(titleCell("Time Slot"));
 
                 List<Meeting> list = DB.meetings.stream().filter(m -> p.equals(m.producer)).collect(Collectors.toList());
-                list.sort((o1, o2) -> o1.timeSlot.start.compareTo(o2.timeSlot.start));
+                list.sort(Comparator.comparing(o -> o.timeSlot.start));
                 for (Meeting m : list) {
                     table.addCell(contentCell(m.project.getName()));
                     table.addCell(contentCell(m.timeSlot.toString()));
@@ -237,7 +237,7 @@ public class PDFGenerator {
                 table.addCell(titleCell("Time Slot"));
 
                 List<Meeting> list = DB.meetings.stream().filter(m -> p.equals(m.project)).collect(Collectors.toList());
-                list.sort((o1, o2) -> o1.timeSlot.start.compareTo(o2.timeSlot.start));
+                list.sort(Comparator.comparing(o -> o.timeSlot.start));
                 for (Meeting m : list) {
                     table.addCell(contentCell(m.producer.getName()));
                     table.addCell(contentCell(m.producer.getCompany()));
@@ -264,11 +264,11 @@ public class PDFGenerator {
         try {
             Image logo = Image.getInstance(getClass().getResource("/logo.jpg"));
             float scale = ((document.getPageSize().getWidth()
-                    - document.leftMargin() - document.rightMargin()) / logo.getWidth()) * 50;
+                    - document.leftMargin() - document.rightMargin()) / logo.getWidth()) * 45;
             logo.scalePercent(scale);
             document.add(logo);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Please add logo.jpg in the resource folder");
         }
 
 
@@ -276,7 +276,7 @@ public class PDFGenerator {
         String text = Export.header.get();
         text = text.replaceAll("#name", name);
         Paragraph header = new Paragraph(text, new Font(Font.FontFamily.HELVETICA, 14));
-        header.setSpacingBefore(20);
+        header.setSpacingBefore(15);
         header.setSpacingAfter(15);
         document.add(header);
     }

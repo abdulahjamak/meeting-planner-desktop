@@ -18,10 +18,13 @@ public class Events {
     public static Node getNode() {
         final TextField search = new TextField();
         FilteredList<Event> filteredData = new FilteredList<>(DB.events, p -> true);
-        search.textProperty().addListener((observable, oldValue, newValue) -> {
-            filteredData.setPredicate(person -> newValue.isEmpty()
-                    || person.getName().toLowerCase().contains(newValue.toLowerCase()));
-        });
+        search.textProperty().addListener(
+                (observable, oldValue, newValue) ->
+                    filteredData.setPredicate(
+                            person -> newValue.isEmpty() ||
+                                    person.getName().toLowerCase().contains(newValue.toLowerCase())
+                    )
+        );
         SortedList<Event> sortedData = new SortedList<>(filteredData);
 
         TableView<Event> list = new TableView<>(sortedData);
@@ -39,7 +42,8 @@ public class Events {
         list.setPrefWidth(500);
         StackPane detail = new StackPane();
         list.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            detail.getChildren().setAll(newValue.getNode());
+            if (newValue != null)
+                detail.getChildren().setAll(newValue.getNode());
         });
 
         Button add = new Button("Add Event");

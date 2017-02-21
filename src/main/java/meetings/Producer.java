@@ -35,6 +35,13 @@ public class Producer extends Participant {
             arrival.set(LocalDateTime.parse(obj.getString("arrival")));
             departure.set(LocalDateTime.parse(obj.getString("departure")));
         } else if (obj.has("arrivalimport")) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yyyy H:mm");
+            if (!obj.getString("arrivalimport").isEmpty()) {
+                arrival.set(LocalDateTime.parse(obj.getString("arrivalimport") + " 6:00", formatter));
+                departure.set(LocalDateTime.parse(obj.getString("departureimport") + " 23:00", formatter));
+            }
+
+        } else if (obj.has("oldone")) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/dd/yyyy H:mm");
             if (!obj.getString("arrivalimport").isEmpty()) {
                 arrival.set(LocalDateTime.parse("" + obj.getString("arrivalimport"), formatter));
